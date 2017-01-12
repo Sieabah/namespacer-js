@@ -1,0 +1,26 @@
+{
+  "name": "namespacer-js",
+  "version": "0.0.1",
+  "description": "Generic file-based namespacing for nodejs",
+  "main": "namespacer.js",
+  "engines": { "node" : ">= 6.0" } 
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Sieabah/namespacer-js.git"
+  },
+  "keywords": [
+    "namespace",
+    "php",
+    "composer",
+    "file"
+  ],
+  "author": "Christopher S. Sidell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sieabah/namespacer-js/issues"
+  },
+  "homepage": "https://github.com/Sieabah/namespacer-js#readme"
+}
