@@ -135,15 +135,12 @@ class Namespace {
   }
 
   /**
-   * Get object of all spaces
+   * Get object of all spaces Returns mutated spaces
+   * @returns {Object}
    */
   static getSpaces(){
     //Super efficient deep clone
     return JSON.parse(JSON.stringify(Namespace._spaces));
-  }
-
-  getSpaces(){
-    return Namespace.getSpaces();
   }
 }
 

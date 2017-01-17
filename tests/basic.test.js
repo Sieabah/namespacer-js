@@ -31,11 +31,11 @@ describe('Namespace Tests', function(){
     it('Should clear spaces correctly', function(){
       let instance = namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
 
-      expect(instance.getSpaces().length > 0).to.eql(true);
+      expect(Namespace.getSpaces().length > 0).to.eql(true);
 
       Namespace._clearSpaces();
 
-      expect(instance.getSpaces().length).to.equal(0);
+      expect(Namespace.getSpaces().length).to.equal(0);
     });
 
     it('Should have correct root if passed', function(){
