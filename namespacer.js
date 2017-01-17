@@ -3,77 +3,171 @@
 const path = require('path');
 
 class Namespace {
-    constructor(conf, root){
-        if(!conf)
-            throw new Error('No namespace config given');
+  /**
+   * Create namespace instance with configuration
+   * @param conf {Object} Object of namespaces and folder paths
+   * @param root {string} Relative or absolute path to root
+   */
+  constructor(conf, root = null){
+    if(!conf)
+        throw new Error('No namespace config given');
 
-        Namespace.addSpacesFromObject(conf, root);
-    }
+    Namespace.addSpacesFromObject(conf, root);
+  }
 
-    static resolve(req) {
-        for (let space of Namespace._spaces)
-            if (space.test.exec(req))
-                return space.root + space.location + req.replace(space.test, '').replace(`/^${path.sep}*/`, '');
+  /**
+   * Resolve filepath
+   * @param req {string} Namespaced path
+   * @throws Error
+   * @returns {string}
+   */
+  static resolve(req) {
+    for (let space of Namespace._spaces)
+      if (space.test.exec(req))
+        return path.normalize(path.join(
+          space.root,
+          space.location,
+          Namespace._stripLeadingSlash(req.replace(space.test, ''))
+        ));
 
-        throw new Error(`'${req}' not found in namespace`);
-    }
+    throw new Error(`'${req}' not found in namespace`);
+  }
 
-    static _ensureEndSlash(str){
-        return str.replace(`/${path.sep}*$/`, '')+path.sep;
-    }
+  static require(req){
+    return require(Namespace.resolve(req));
+  }
 
-    static _createSpace({ name, rel, root }){
-        return {
-            name,
-            root: Namespace._ensureEndSlash(root),
-            location: rel.replace(`/${path.sep}*$/`, '')+path.sep,
-            test: new RegExp(`^${name}`)
-        };
-    }
+  /**
+   * Ensure string ends with path separator
+   * @param str {string} Path to ensure
+   * @returns {string}
+   * @private
+   */
+  static _ensureEndSlash(str){
+    return str.replace(new RegExp(`${path.sep}*$`), '')+path.sep;
+  }
 
-    static _readConf(conf, root){
-        let _spaces = [];
+  static _stripLeadingSlash(str){
+    return str.replace(new RegExp(`/^${path.sep}*/`, ''));
+  }
 
-        root = root || path.dirname(module.parent.paths[0]);
+  /**
+   * Create space from name, relative path from root
+   * @param name {string} Namespace
+   * @param rel {string} Path to namespace
+   * @param root {string} Path to root
+   * @returns {{name: string, root: string, location: string, test: RegExp}}
+   * @private
+   */
+  static _createSpace({ name, rel, root }){
+    return {
+      name,
+      root: Namespace._ensureEndSlash(root),
+      location: Namespace._ensureEndSlash(rel),
+      test: new RegExp(`^${name}`)
+    };
+  }
 
-        for(let space of Object.keys(conf))
-            _spaces.push(Namespace._createSpace({ name: space, rel: conf[space], root }));
+  /**
+   * Try to guess what path root we want
+   * @private
+   */
+  static _getSpaceRoot(){
+    return process.cwd(); //path.dirname(module.parent.paths[0])
+  }
 
-        //Sort by more specific namespace first
-        _spaces.sort(Namespace._spaceSorter);
+  /**
+   * Read from configuration
+   * @param conf {Object} Namespace configuration object
+   * @param root {string} Path to root
+   * @returns {Array}
+   * @private
+   */
+  static _readConf(conf, root){
+    let _spaces = [];
 
-        return _spaces;
-    }
+    root = root || Namespace._getSpaceRoot();
 
-    static _spaceSorter(a,b){
-        return b.name.length - a.name.length
-    }
+    for(let space of Object.keys(conf))
+      _spaces.push(Namespace._createSpace({ name: space, rel: conf[space], root }));
 
-    static _sortSpaces(){
-        Namespace._spaces.sort(Namespace._spaceSorter);
-    }
+    //Sort by more specific namespace first
+    _spaces.sort(Namespace._spaceSorter);
 
-    static addSpacesFromObject(obj, root){
-        let _spaces = Namespace._readConf(obj, root);
+    return _spaces;
+  }
 
-        if(Namespace._spaces.length > 0)
-            Namespace._spaces.push(..._spaces);
-        else
-            Namespace._spaces = _spaces;
+  /**
+   * Sort namespaces based on length (more specific first)
+   * @param a {string}
+   * @param b {string}
+   * @returns {number}
+   * @private
+   */
+  static _spaceSorter(a,b){
+    return b.name.length - a.name.length
+  }
 
-        Namespace._sortSpaces();
-    }
+  /**
+   * Sort global namespaces
+   * @private
+   */
+  static _sortSpaces(){
+    Namespace._spaces.sort(Namespace._spaceSorter);
+  }
 
-    static getSpaces(){
-        //Super efficient deep clone
-        return JSON.parse(JSON.stringify(Namespace._spaces));
-    }
+  /**
+   * Add namespaces from object
+   * @param obj {Object} Configuration object
+   * @param root {string} Path to root
+   */
+  static addSpacesFromObject(obj, root){
+    let _spaces = Namespace._readConf(obj, root);
+
+    if(Namespace._spaces.length > 0)
+      Namespace._spaces.push(..._spaces);
+    else
+      Namespace._spaces = _spaces;
+
+    Namespace._sortSpaces();
+  }
+
+  static _clearSpaces(){
+    Namespace._spaces = []
+  }
+
+  /**
+   * Get object of all spaces
+   */
+  static getSpaces(){
+    //Super efficient deep clone
+    return JSON.parse(JSON.stringify(Namespace._spaces));
+  }
+
+  getSpaces(){
+    return Namespace.getSpaces();
+  }
 }
 
 if(!Namespace._spaces)
-    Namespace._spaces = [];
+  /**
+   * Static variable of all namespaces
+   * @type {Array}
+   * @static
+   * @private
+   */
+  Namespace._clearSpaces();
 
 module.exports = {
-    namespace: Namespace,
-    instance: (conf, root) => new Namespace(conf, root)
+  /**
+   * Static namespace reference
+   */
+  namespace: Namespace,
+
+  /**
+   * Create namespace instance that references
+   * @param conf {Object} Configuration object to add to global namespaces
+   * @param root {string} Path to root of namespace
+   */
+  instance: (conf, root = null) => new Namespace(conf, root)
 };

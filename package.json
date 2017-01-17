@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "description": "Generic file-based namespacing for nodejs",
   "main": "namespacer.js",
-  "engines": { "node" : ">= 6.0" },
+  "engines": {
+    "node": ">= 6.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,13 @@
   "bugs": {
     "url": "https://github.com/Sieabah/namespacer-js/issues"
   },
-  "homepage": "https://github.com/Sieabah/namespacer-js#readme"
+  "homepage": "https://github.com/Sieabah/namespacer-js#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "jsdoc": "^3.4.3",
+    "mocha": "^3.2.0"
+  },
+  "dependencies": {
+    "glob": "^7.1.1"
+  }
 }

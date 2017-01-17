@@ -1,0 +1,7 @@
+# NodeJS
+node_modules/
+*.log
+
+# IntelliJ
+.idea
+*iml
