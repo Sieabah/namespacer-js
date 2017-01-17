@@ -3,7 +3,7 @@
 const namespace = require('../namespacer'),
   Namespace = namespace.namespace,
   path = require('path'),
-  expect = require('chai').expect;
+  expect = require('expect.js');
 
 describe('Namespace Tests', function(){
   describe('Basics', function(){
@@ -18,7 +18,11 @@ describe('Namespace Tests', function(){
       let spaces = instance.getSpaces();
 
       expect(instance).to.be.a('object');
-      expect(spaces).to.have.lengthOf(1);
+      expect(spaces).to.have.length(1);
+    });
+
+    it('Explode if given no actual config', function(){
+      expect(namespace.instance).to.throwException();
     });
 
     it('Should clear spaces correctly', function(){
@@ -58,12 +62,30 @@ describe('Namespace Tests', function(){
       expect(filepath).to.eql(path.resolve('./tests/Namespace/Thing.js'));
     });
 
+    it('Explodes if name is not in namespace', function(){
+      namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
+      expect(Namespace.resolve).withArgs('NOTHERE/Thing.js').to.throwException();
+    });
+
     it('Can resolve more specific space first', function(){
       const Thing = require('./Namespace/Thing');
 
       namespace.instance({'NS/': 'Namespace/', 'NS/Specific': 'Namespace/Spec'}, path.resolve('./tests'));
 
       expect(Namespace.resolve('NS/Specific/Thing.js')).to.eql(path.resolve('./tests/Namespace/Spec/Thing.js'));
+
+      let sorted = [];
+      for(let space of Namespace.getSpaces())
+        sorted.push(space.name);
+
+      expect(sorted).to.eql(['NS/Specific', 'NS/']);
+    });
+
+    it('Can add more namespaces', function(){
+      const Thing = require('./Namespace/Thing');
+
+      Namespace.addSpacesFromObject({'NS/': 'Namespace/'}, path.resolve('./tests'));
+      Namespace.addSpacesFromObject({'NS/Specific': 'Namespace/Spec'}, path.resolve('./tests'));
 
       let sorted = [];
       for(let space of Namespace.getSpaces())
