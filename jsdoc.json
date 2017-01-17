@@ -1,0 +1,22 @@
+{
+  "tags": {},
+  "source": {
+    "include": ["."],
+    "includePattern": ".+\\.js$",
+    "exclude": ["tests"]
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true,
+    "linenums": true,
+    "copyright": "Copyright © 2016 Asymmetrik, Ltd. All Rights Reserved.",
+    "systemName": "Campfire",
+    "outputSourceFiles": true,
+    "outputSourcePath": true
+  },
+  "opts": {
+    "destination": "./docs/",
+    "template": "node_modules/ink-docstrap/template"
+  }
+}

@@ -1,6 +1,7 @@
 # NodeJS
 node_modules/
 *.log
+docs
 
 # IntelliJ
 .idea
