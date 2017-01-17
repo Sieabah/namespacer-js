@@ -64,7 +64,7 @@ describe('Namespace Tests', function(){
 
     it('Explodes if name is not in namespace', function(){
       namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
-      expect(Namespace.resolve('NOTHERE/Thing.js')).to.throwException();
+      expect(Namespace.resolve).withArgs('NOTHERE/Thing.js').to.throwException();
     });
 
     it('Can resolve more specific space first', function(){
