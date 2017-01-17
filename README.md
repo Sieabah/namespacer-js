@@ -2,6 +2,7 @@
 ### The namespaces you always wanted but never asked for
 
 [![Build Status](https://travis-ci.org/Sieabah/namespacer-js.svg?branch=master)](https://travis-ci.org/Sieabah/namespacer-js)
+[![Coverage Status](https://coveralls.io/repos/github/Sieabah/namespacer-js/badge.svg?branch=feature%2Fadd_code_coverage)](https://coveralls.io/github/Sieabah/namespacer-js?branch=feature%2Fadd_code_coverage)
 
 Namespacer is a simple library that aliases namespaces into filepaths without having to deal with including
 folders into your NODE_PATH or anything like that. It also allows you to create namespaces programaitcally.

@@ -1,7 +1,10 @@
 # NodeJS
 node_modules/
 *.log
+
+# Build & Testing
 docs
+coverage
 
 # IntelliJ
 .idea
