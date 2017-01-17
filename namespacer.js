@@ -2,6 +2,8 @@
 
 const path = require('path');
 
+const Space = require('./lib/Space');
+
 class Namespace {
   /**
    * Create namespace instance with configuration
@@ -23,12 +25,8 @@ class Namespace {
    */
   static resolve(req) {
     for (let space of Namespace._spaces)
-      if (space.test.exec(req))
-        return path.normalize(path.join(
-          space.root,
-          space.location,
-          Namespace._stripLeadingSlash(req.replace(space.test, ''))
-        ));
+      if (space.test(req))
+        return space.path(req);
 
     throw new Error(`'${req}' not found in namespace`);
   }
@@ -60,12 +58,12 @@ class Namespace {
    * @private
    */
   static _createSpace({ name, rel, root }){
-    return {
+    return new Space({
       name,
       root: Namespace._ensureEndSlash(root),
       location: Namespace._ensureEndSlash(rel),
       test: new RegExp(`^${name}`)
-    };
+    });
   }
 
   /**
@@ -105,7 +103,7 @@ class Namespace {
    * @private
    */
   static _spaceSorter(a,b){
-    return b.name.length - a.name.length
+    return b.name().length - a.name().length
   }
 
   /**

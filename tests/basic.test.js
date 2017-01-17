@@ -7,6 +7,7 @@ const namespace = require('../namespacer'),
 
 describe('Namespace Tests', function(){
   describe('Basics', function(){
+    const Space = require('../lib/Space');
 
     beforeEach(function(done){
       Namespace._clearSpaces();
@@ -15,10 +16,12 @@ describe('Namespace Tests', function(){
 
     it('Create instance', function(){
       let instance = namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
-      let spaces = instance.getSpaces();
+      let spaces = Namespace._spaces;
 
       expect(instance).to.be.a('object');
       expect(spaces).to.have.length(1);
+
+      expect(spaces[0]).to.be.a(Space);
     });
 
     it('Explode if given no actual config', function(){
@@ -38,21 +41,21 @@ describe('Namespace Tests', function(){
     it('Should have correct root if passed', function(){
       let instance = namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
 
-      let space = instance.getSpaces()[0];
+      let space = Namespace._spaces[0];
 
       expect(space).to.be.a('object');
-      expect(space.root).to.be.a('string');
-      expect(space.root).to.eql(path.resolve('./tests')+'/');
+      expect(space.root()).to.be.a('string');
+      expect(space.root()).to.eql(path.resolve('./tests')+'/');
     });
 
     it('Should have pull root with node_modules', function(){
       let instance = namespace.instance({'NS/': 'Namespace/'});
 
-      let space = instance.getSpaces()[0];
+      let space = Namespace._spaces[0];
 
       expect(space).to.be.a('object');
-      expect(space.root).to.be.a('string');
-      expect(space.root).to.eql(path.resolve('./')+'/');
+      expect(space.root()).to.be.a('string');
+      expect(space.root()).to.eql(path.resolve('./')+'/');
     });
 
     it('Can resolve from namespace', function(){
@@ -75,8 +78,8 @@ describe('Namespace Tests', function(){
       expect(Namespace.resolve('NS/Specific/Thing.js')).to.eql(path.resolve('./tests/Namespace/Spec/Thing.js'));
 
       let sorted = [];
-      for(let space of Namespace.getSpaces())
-        sorted.push(space.name);
+      for(let space of Namespace._spaces)
+        sorted.push(space.name());
 
       expect(sorted).to.eql(['NS/Specific', 'NS/']);
     });
@@ -88,8 +91,8 @@ describe('Namespace Tests', function(){
       Namespace.addSpacesFromObject({'NS/Specific': 'Namespace/Spec'}, path.resolve('./tests'));
 
       let sorted = [];
-      for(let space of Namespace.getSpaces())
-        sorted.push(space.name);
+      for(let space of Namespace._spaces)
+        sorted.push(space.name());
 
       expect(sorted).to.eql(['NS/Specific', 'NS/']);
     });
