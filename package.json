@@ -7,9 +7,10 @@
     "node": ">= 6.0"
   },
   "scripts": {
+    "build": "istanbul cover ./node_modules/mocha/bin/_mocha ./tests/*.test.js --report lcovonly -- -R spec",
     "pretest": "jsdoc -c jsdoc.json",
-    "test": "istanbul cover ./node_modules/mocha/bin/_mocha ./tests/*.test.js --report lcovonly -- -R spec",
-    "posttest": "if [[ -z '${COVERALLS_REPO_TOKEN}' ]]; then cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js; fi; rm -rf ./coverage"
+    "test": "npm run build",
+    "posttest": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js; rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
