@@ -1,6 +1,9 @@
 'use strict';
 
-const path = require('path');
+const path = require('path'),
+      fs = require('fs');
+
+const Space = require('./lib/Space');
 
 class Namespace {
   /**
@@ -23,12 +26,8 @@ class Namespace {
    */
   static resolve(req) {
     for (let space of Namespace._spaces)
-      if (space.test.exec(req))
-        return path.normalize(path.join(
-          space.root,
-          space.location,
-          Namespace._stripLeadingSlash(req.replace(space.test, ''))
-        ));
+      if (space.test(req))
+        return space.path(req);
 
     throw new Error(`'${req}' not found in namespace`);
   }
@@ -38,34 +37,15 @@ class Namespace {
   }
 
   /**
-   * Ensure string ends with path separator
-   * @param str {string} Path to ensure
-   * @returns {string}
-   * @private
-   */
-  static _ensureEndSlash(str){
-    return str.replace(new RegExp(`${path.sep}*$`), '')+path.sep;
-  }
-
-  static _stripLeadingSlash(str){
-    return str.replace(new RegExp(`/^${path.sep}*/`, ''));
-  }
-
-  /**
    * Create space from name, relative path from root
    * @param name {string} Namespace
    * @param rel {string} Path to namespace
    * @param root {string} Path to root
-   * @returns {{name: string, root: string, location: string, test: RegExp}}
+   * @returns {Space}
    * @private
    */
   static _createSpace({ name, rel, root }){
-    return {
-      name,
-      root: Namespace._ensureEndSlash(root),
-      location: Namespace._ensureEndSlash(rel),
-      test: new RegExp(`^${name}`)
-    };
+    return new Space({ name, root, location: rel });
   }
 
   /**
@@ -74,6 +54,16 @@ class Namespace {
    */
   static _getSpaceRoot(){
     return process.cwd(); //path.dirname(module.parent.paths[0])
+  }
+
+  /**
+   * Get spaces file relative to including module
+   * @param fp {string} Relative path to spaces file
+   * @private
+   * @return {string}
+   */
+  static _getSpaceRootFromIncludedModule(fp){
+    return path.normalize(path.join(path.dirname(module.parent.filename), fp));
   }
 
   /**
@@ -105,7 +95,7 @@ class Namespace {
    * @private
    */
   static _spaceSorter(a,b){
-    return b.name.length - a.name.length
+    return b.name().length - a.name().length
   }
 
   /**
@@ -132,20 +122,48 @@ class Namespace {
     Namespace._sortSpaces();
   }
 
+  /**
+   * Load namespace from file
+   * @param fp {string|null} Absolute or relative path
+   */
+  static addSpacesFromFile(fp=null){
+    if(fp == null){
+      //Find default files
+      let js = path.normalize(path.join(Namespace._getSpaceRoot(), '.spaces.js'));
+      let json = path.normalize(path.join(Namespace._getSpaceRoot(), '.spaces.json'));
+
+      if(fs.existsSync(js))
+        fp = js;
+      else if (fs.existsSync(json))
+        fp = json;
+      else
+        throw new Error('No spaces file could be found!');
+    }
+
+    if(path.isAbsolute(fp))
+      Namespace.addSpacesFromObject(require(fp), path.dirname(fp));
+    else {
+      let absolute = Namespace._getSpaceRootFromIncludedModule(fp);
+      Namespace.addSpacesFromObject(require(absolute), path.dirname(absolute));
+    }
+  }
+
+  /**
+   * Clear out namespaces
+   * This destroys data
+   * @private
+   */
   static _clearSpaces(){
     Namespace._spaces = []
   }
 
   /**
-   * Get object of all spaces
+   * Get object of all spaces Returns mutated spaces
+   * @returns {Object}
    */
   static getSpaces(){
     //Super efficient deep clone
     return JSON.parse(JSON.stringify(Namespace._spaces));
-  }
-
-  getSpaces(){
-    return Namespace.getSpaces();
   }
 }
 

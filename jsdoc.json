@@ -1,7 +1,7 @@
 {
   "tags": {},
   "source": {
-    "include": ["."],
+    "include": [".", "lib"],
     "includePattern": ".+\\.js$",
     "exclude": ["tests"]
   },

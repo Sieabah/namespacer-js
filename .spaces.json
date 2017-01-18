@@ -1,0 +1,4 @@
+{
+  "NS/": "tests/Namespace",
+  "ENV/": "tests/ENV/dev"
+}
