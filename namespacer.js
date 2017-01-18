@@ -1,9 +1,11 @@
 'use strict';
 
 const path = require('path'),
-      fs = require('fs');
+      fs = require('fs'),
+      glob = require('glob');
 
-const Space = require('./lib/Space');
+const Space = require('./lib/Space'),
+      Listing = require('./lib/Listing');
 
 class Namespace {
   /**
@@ -25,6 +27,9 @@ class Namespace {
    * @returns {string}
    */
   static resolve(req) {
+    if(req == null)
+      throw new Error(`'${req}' path must be defined`);
+
     for (let space of Namespace._spaces)
       if (space.test(req))
         return space.path(req);
@@ -32,7 +37,24 @@ class Namespace {
     throw new Error(`'${req}' not found in namespace`);
   }
 
+  /**
+   * Resolve and require namespace
+   * @param req {string} Namespaced path
+   * @return {Object|*}
+   */
   static require(req){
+
+    if(glob.hasMagic(req)) {
+      //Strip pesky glob
+      let _all = req.replace(new RegExp(/\*\*$/), '');
+      let _immediate = req.replace(new RegExp(/\*$/), '');
+
+      if(_all !== req)
+        return Namespace.listAll(_all).map((listing) => listing.require());
+      else
+        return Namespace.list(_immediate).map((listing) => listing.require());
+    }
+
     return require(Namespace.resolve(req));
   }
 
@@ -46,6 +68,34 @@ class Namespace {
    */
   static _createSpace({ name, rel, root }){
     return new Space({ name, root, location: rel });
+  }
+
+  /**
+   * List files in immediate namespace
+   * @param req {string} Namespaced path
+   * @param globStr {string} Glob to list files with
+   */
+  static list(req, globStr='!(_)*.js'){
+    if(req == null)
+      throw new Error('No namespace given');
+
+    let space = Namespace.resolve(req);
+
+    return glob.sync(`${space}/${globStr}`).map((path) => new Listing({path}));
+  }
+
+  /**
+   * List all files in namespace
+   * @param req {string} Namespaced path
+   * @param globStr {string} Glob to list files with
+   */
+  static listAll(req, globStr='!(_)*.js'){
+    if(req == null)
+      throw new Error('No namespace given');
+
+    let space = Namespace.resolve(req);
+
+    return glob.sync(`${space}/**/${globStr}`).map((path) => new Listing({path}));
   }
 
   /**

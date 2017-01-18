@@ -227,5 +227,65 @@ describe('Namespace Tests', function(){
         expect(config).not.to.equal(DevConfig);
       });
     });
+
+    describe('Namespace Globs', function(){
+      it('Lists all correct files in directory', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.list('NS/');
+
+        expect(space).to.have.length(2);
+        expect(space.map((listing) => listing.name()).sort()).to.eql(['Thing', 'Thing2']);
+      });
+
+      it('Doesn\'t list private files', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.list('NS/Subspace');
+
+        expect(space).to.have.length(1);
+        expect(space.map((listing) => listing.name())).to.eql(['Thing3']);
+      });
+
+      it('Explodes when given no namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        expect(Namespace.list).to.throwException();
+        expect(Namespace.listAll).to.throwException();
+      });
+
+      it('List all files in namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.listAll('NS/');
+
+        expect(space).to.have.length(3);
+        expect(space.map((listing) => listing.name()).sort()).to.eql(['Thing', 'Thing2', 'Thing3']);
+      });
+
+      it('Require all in immediate namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.require('NS/*');
+
+        expect(space).to.have.length(2);
+      });
+
+      it('Require all in namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        const classes = [
+          require('./Namespace/Thing'),
+          require('./Namespace/Thing2'),
+          require('./Namespace/Subspace/Thing3')
+        ];
+
+        let spaces = Namespace.require('NS/**');
+
+        expect(spaces).to.have.length(3);
+
+        //Test if classes are correct
+      });
+    });
   });
 });
