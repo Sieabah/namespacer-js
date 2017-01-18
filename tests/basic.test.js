@@ -124,7 +124,7 @@ describe('Namespace Tests', function(){
       it('Can load namespaces', function(){
         Namespace.addSpacesFromFile(path.resolve('./tests/.spaces.js'));
 
-        expect(Namespace.getSpaces()).to.have.length(1);
+        expect(Namespace.getSpaces()).to.have.length(2);
       });
 
       it('Can require from namespaces', function(){
@@ -136,13 +136,23 @@ describe('Namespace Tests', function(){
 
         expect(thing).to.be.a(Thing);
       });
+
+      it('Can require from absolutely pathed namespaces', function(){
+        Namespace.addSpacesFromFile(path.resolve('./tests/.spaces.js'));
+
+        const Thing = require('./Namespace/Thing');
+
+        let thing = new (Namespace.require('ABS/Thing.js'));
+
+        expect(thing).to.be.a(Thing);
+      });
     });
 
     describe('Relative filepathing', function(){
       it('Can load namespaces', function(){
         Namespace.addSpacesFromFile('./.spaces.js');
 
-        expect(Namespace.getSpaces()).to.have.length(1);
+        expect(Namespace.getSpaces()).to.have.length(2);
       });
 
       it('Can require from namespaces', function(){
@@ -175,7 +185,7 @@ describe('Namespace Tests', function(){
           process.chdir('./tests');
 
           Namespace.addSpacesFromFile();
-          expect(Namespace.getSpaces()).to.have.length(1);
+          expect(Namespace.getSpaces()).to.have.length(2);
 
           done();
         } catch(e){
