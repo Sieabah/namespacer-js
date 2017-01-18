@@ -66,6 +66,11 @@ describe('Namespace Tests', function(){
       expect(filepath).to.eql(path.resolve('./tests/Namespace/Thing.js'));
     });
 
+    it('Explodes if given no path', function(){
+      namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
+      expect(Namespace.require).to.throwException();
+    });
+
     it('Explodes if name is not in namespace', function(){
       namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
       expect(Namespace.resolve).withArgs('NOTHERE/Thing.js').to.throwException();
@@ -261,6 +266,7 @@ describe('Namespace Tests', function(){
 
         expect(space).to.have.length(3);
         expect(space.map((listing) => listing.name()).sort()).to.eql(['Thing', 'Thing2', 'Thing3']);
+        expect(space.map((listing) => listing.base()).sort()).to.eql(['Thing.js', 'Thing2.js', 'Thing3.js']);
       });
 
       it('Require all in immediate namespace', function(){
