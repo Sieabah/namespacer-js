@@ -1,6 +1,6 @@
 {
   "name": "namespacer-js",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Generic file-based namespacing for nodejs",
   "main": "namespacer.js",
   "engines": {
