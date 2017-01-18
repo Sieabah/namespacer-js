@@ -45,10 +45,6 @@ class Namespace {
     return str.replace(new RegExp(`${path.sep}*$`), '')+path.sep;
   }
 
-  static _stripLeadingSlash(str){
-    return str.replace(new RegExp(`/^${path.sep}*/`, ''));
-  }
-
   /**
    * Create space from name, relative path from root
    * @param name {string} Namespace
