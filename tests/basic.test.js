@@ -66,6 +66,11 @@ describe('Namespace Tests', function(){
       expect(filepath).to.eql(path.resolve('./tests/Namespace/Thing.js'));
     });
 
+    it('Explodes if given no path', function(){
+      namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
+      expect(Namespace.resolve).to.throwException();
+    });
+
     it('Explodes if name is not in namespace', function(){
       namespace.instance({'NS/': 'Namespace/'}, path.resolve('./tests'));
       expect(Namespace.resolve).withArgs('NOTHERE/Thing.js').to.throwException();
@@ -119,7 +124,7 @@ describe('Namespace Tests', function(){
       it('Can load namespaces', function(){
         Namespace.addSpacesFromFile(path.resolve('./tests/.spaces.js'));
 
-        expect(Namespace.getSpaces()).to.have.length(1);
+        expect(Namespace.getSpaces()).to.have.length(2);
       });
 
       it('Can require from namespaces', function(){
@@ -131,13 +136,23 @@ describe('Namespace Tests', function(){
 
         expect(thing).to.be.a(Thing);
       });
+
+      it('Can require from absolutely pathed namespaces', function(){
+        Namespace.addSpacesFromFile(path.resolve('./tests/.spaces.js'));
+
+        const Thing = require('./Namespace/Thing');
+
+        let thing = new (Namespace.require('ABS/Thing.js'));
+
+        expect(thing).to.be.a(Thing);
+      });
     });
 
     describe('Relative filepathing', function(){
       it('Can load namespaces', function(){
         Namespace.addSpacesFromFile('./.spaces.js');
 
-        expect(Namespace.getSpaces()).to.have.length(1);
+        expect(Namespace.getSpaces()).to.have.length(2);
       });
 
       it('Can require from namespaces', function(){
@@ -170,7 +185,7 @@ describe('Namespace Tests', function(){
           process.chdir('./tests');
 
           Namespace.addSpacesFromFile();
-          expect(Namespace.getSpaces()).to.have.length(1);
+          expect(Namespace.getSpaces()).to.have.length(2);
 
           done();
         } catch(e){
@@ -225,6 +240,70 @@ describe('Namespace Tests', function(){
 
         expect(config).to.eql(ProdConfig);
         expect(config).not.to.equal(DevConfig);
+      });
+    });
+
+    describe('Namespace Globs', function(){
+      it('Lists all correct files in directory', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.list('NS/');
+
+        expect(space).to.have.length(2);
+        expect(space.map((listing) => listing.name()).sort()).to.eql(['Thing', 'Thing2']);
+      });
+
+      it('Doesn\'t list private files', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.list('NS/Subspace');
+
+        expect(space).to.have.length(1);
+        expect(space.map((listing) => listing.name())).to.eql(['Thing3']);
+      });
+
+      it('Explodes when given no namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        expect(Namespace.list).to.throwException();
+        expect(Namespace.listAll).to.throwException();
+      });
+
+      it('List all files in namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.listAll('NS/');
+
+        expect(space).to.have.length(3);
+        expect(space.map((listing) => listing.name()).sort()).to.eql(['Thing', 'Thing2', 'Thing3']);
+        expect(space.map((listing) => listing.base()).sort()).to.eql(['Thing.js', 'Thing2.js', 'Thing3.js']);
+      });
+
+      it('Require all in immediate namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+
+        let space = Namespace.require('NS/*');
+
+        expect(space).to.have.length(2);
+      });
+
+      it('Require all in namespace', function(){
+        Namespace.addSpacesFromFile('./.spaces.js');
+        const classes = [
+          require('./Namespace/Thing'),
+          require('./Namespace/Thing2'),
+          require('./Namespace/Subspace/Thing3')
+        ].map((c) => (new c()).constructor.name);
+
+        let spaces = Namespace.require('NS/**');
+
+        expect(spaces).to.have.length(3);
+
+        //Test if classes are correct
+        for(let space of spaces){
+          let name = (new space()).constructor.name;
+          expect(classes.indexOf(name)).not.to.be(-1);
+        }
       });
     });
   });

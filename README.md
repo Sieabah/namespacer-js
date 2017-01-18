@@ -25,3 +25,49 @@ module.exports = {
     'NS/Config': 'Namespace/Something/Config'
 };
 ```
+
+It is also possible to dynamically decide what folder your namespace leads to, for example if you wanted to have
+specific configuration files given in an environment you can structure your spaces like so.
+
+```
+#.spaces.js
+'use strict';
+
+module.exports = {
+    'ENV/': `config/${process.env.NODE_ENV}`
+};
+```
+
+To load an environment you can give namespacer a relative or absolute path to your spaces file, or an object 
+of namespaces. If passed a straight object it will guess at your root being the node execution root. If namespaces 
+are passed from a file the all namespaces are relative to the location of the spaces file.
+
+If your spaces file is in `<root>/config/.spaces.js` and it defines `'NS/foo' => 'foo'` the mapped 
+path is `<root>/config/foo`. Simply define the namespace as `'NS/foo' => '../foo'` to resolve the issue or require
+the namespace configuration as an object and set the root as the root of the application.
+
+```
+//Include namespace however you want, via an instance or static
+const namespace = require('../namespacer'),
+      Namespace = namespace.namespace;
+
+```
+
+```
+//Load namespace from object mapping the results to root
+Namespace.addSpacesFromObject({'NS/': 'config/'}, path.resolve('./'));
+Namespace.addSpacesFromObject(require('./.spaces.js'), path.resolve('./'));
+```
+
+```
+//Load namespace from default spaces file, looks for .spaces.js before .spaces.json
+Namespace.addSpacesFromFile();
+```
+
+```
+//Load namespace from relative path to spaces file
+Namespace.addSpacesFromFile('../.spaces.js');
+
+//Load namespace from absolute path to spaces file
+Namespace.addSpacesFromFile(path.resolve('./.spaces.js'));
+```
