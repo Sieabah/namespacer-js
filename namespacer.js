@@ -235,7 +235,7 @@ module.exports = {
   /**
    * Create namespace instance that references
    * @param conf {Object} Configuration object to add to global namespaces
-   * @param root {string} Path to root of namespace
+   * @param root {string|null} Path to root of namespace
    */
   instance: (conf, root = null) => new Namespace(conf, root)
 };

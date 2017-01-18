@@ -289,18 +289,21 @@ describe('Namespace Tests', function(){
 
       it('Require all in namespace', function(){
         Namespace.addSpacesFromFile('./.spaces.js');
-
         const classes = [
           require('./Namespace/Thing'),
           require('./Namespace/Thing2'),
           require('./Namespace/Subspace/Thing3')
-        ];
+        ].map((c) => (new c()).constructor.name);
 
         let spaces = Namespace.require('NS/**');
 
         expect(spaces).to.have.length(3);
 
         //Test if classes are correct
+        for(let space of spaces){
+          let name = (new space()).constructor.name;
+          expect(classes.indexOf(name)).not.to.be(-1);
+        }
       });
     });
   });

@@ -1,5 +1,8 @@
 'use strict';
 
+let path = require('path');
+
 module.exports = {
-  'NS/': 'Namespace/'
+  'NS/': 'Namespace/',
+  'ABS/': path.resolve('./tests/Namespace')
 };
