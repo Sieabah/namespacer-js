@@ -3,6 +3,7 @@
 const namespace = require('../namespacer'),
   Namespace = namespace.namespace,
   path = require('path'),
+  fs = require('fs'),
   expect = require('expect.js');
 
 describe('Namespace Tests', function(){
@@ -176,6 +177,20 @@ describe('Namespace Tests', function(){
           done(e);
         } finally {
           process.chdir('../');
+        }
+      });
+
+      it('Will explode if it can\'t find spaces file', function(done){
+        try {
+          fs.rename(path.resolve('./.spaces.json'), path.resolve('./.spaces-test.json'));
+
+          expect(Namespace.addSpacesFromFile).to.throwException();
+
+          done();
+        } catch(e){
+          done(e);
+        } finally {
+          fs.rename(path.resolve('./.spaces-test.json'), path.resolve('./.spaces.json'));
         }
       });
 

@@ -137,7 +137,7 @@ class Namespace {
       else if (fs.existsSync(json))
         fp = json;
       else
-        throw new Error('No .space file could be found!');
+        throw new Error('No spaces file could be found!');
     }
 
     if(path.isAbsolute(fp))
