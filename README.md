@@ -12,3 +12,16 @@ level as your node_modules folder.
 
 Currently it follows the [PSR-4](http://www.php-fig.org/psr/psr-4/) because I have yet to create a javascript spec
 for loading namespaces neatly and include options for glob loading.
+
+A namespace can be created from any object as long as it follows the format of the **key** being the namespace
+where the **value** is the location on the file system relative to the *.spaces.js* file.
+
+```
+#.spaces.js
+'use strict';
+
+module.exports = {
+    'NS/': 'Namespace/',
+    'NS/Config': 'Namespace/Something/Config'
+};
+```
