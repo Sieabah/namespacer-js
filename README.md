@@ -48,26 +48,28 @@ the namespace configuration as an object and set the root as the root of the app
 
 ```
 //Include namespace however you want, via an instance or static
-const namespace = require('../namespacer'),
-      Namespace = namespace.namespace;
+//Instanced
+const Namespace = require('namespacer-js');
+//Static
+const {namespace} = require('namespacer-js');
 
 ```
 
 ```
 //Load namespace from object mapping the results to root
-Namespace.addSpacesFromObject({'NS/': 'config/'}, path.resolve('./'));
-Namespace.addSpacesFromObject(require('./.spaces.js'), path.resolve('./'));
+namespace.addSpacesFromObject({'NS/': 'config/'}, path.resolve('./'));
+namespace.addSpacesFromObject(require('./.spaces.js'), path.resolve('./'));
 ```
 
 ```
 //Load namespace from default spaces file, looks for .spaces.js before .spaces.json
-Namespace.addSpacesFromFile();
+namespace.addSpacesFromFile();
 ```
 
 ```
 //Load namespace from relative path to spaces file
-Namespace.addSpacesFromFile('../.spaces.js');
+namespace.addSpacesFromFile('../.spaces.js');
 
 //Load namespace from absolute path to spaces file
-Namespace.addSpacesFromFile(path.resolve('./.spaces.js'));
+namespace.addSpacesFromFile(path.resolve('./.spaces.js'));
 ```
